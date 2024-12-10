@@ -1,0 +1,224 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;  /* Fundo cinza clarinho */
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+  
+  header {
+    background-color: #fff;  /* Fundo branco para o header */
+    color: #333;
+    padding: 15px;  /* Diminuído o padding */
+    border-bottom: 3px solid #4CAF50;
+    max-width: 800px;  /* Largura máxima */
+    margin: 0 auto;  /* Centralizar */
+    margin-top: 10px;
+  }
+  /* Menu Superior */
+.menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8f9fa; /* Cor clara */
+    padding: 15px 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombras suaves */
+    border-bottom: 2px solid #e9ecef;
+  }
+  
+  .menu div {
+    display: flex;
+    align-items: center;
+  }
+  
+  .menu a {
+    color: #4CAF50; /* Cor verde para contraste */
+    text-decoration: none;
+    margin-left: 20px;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .menu a:first-child {
+    margin-left: 0;
+  }
+  
+  .menu a:hover {
+    background-color: #4CAF50; /* Fundo verde ao passar o mouse */
+    color: white; /* Texto branco */
+  }
+  
+  .book-details {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  
+  .book-info {
+    flex: 1;
+    margin-right: 20px;
+  }
+  
+  .book-info h1 {
+    font-size: 2em;  /* Diminuído o tamanho do título */
+    margin-bottom: 10px;
+  }
+  
+  .book-info p {
+    font-size: 1em;
+    margin: 5px 0;
+  }
+  
+  .book-image {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .book-image img {
+    width: 100%;
+    max-width: 250px;  /* Reduzido o tamanho da imagem */
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  
+  /* Detalhes do Livro */
+  section {
+    padding: 15px;  /* Reduzido o padding */
+    max-width: 800px;
+    margin: 20px auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  section h2 {
+    font-size: 1.6em;  /* Tamanho do subtítulo reduzido */
+    color: #2c3e50;
+    margin-bottom: 10px;
+  }
+  
+  section p {
+    font-size: 1em;  /* Tamanho do texto reduzido */
+    line-height: 1.5;
+    color: #7f8c8d;
+  }
+  
+  /* Avaliações */
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  li {
+    border-bottom: 1px solid #ddd;
+    padding: 8px 0;  /* Diminuído o padding */
+  }
+  
+  li p {
+    margin: 5px 0;
+  }
+  
+  li strong {
+    color: #2c3e50;
+  }
+  
+  /* Estilo para o botão de voltar */
+  footer {
+    text-align: center;
+    padding: 10px;  /* Reduzido o padding */
+    background-color: #fff;
+    border-top: 2px solid #ddd;
+  }
+  
+  footer a {
+    color: #1e2a3a;
+    text-decoration: none;
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+  
+  footer a:hover {
+    color: #4CAF50;
+    text-decoration: underline;
+  }
+  
+  /* Estilo para o botão */
+  button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 8px 15px;  /* Reduzido o tamanho do botão */
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 20px;
+  }
+  
+  button:hover {
+    background-color: #429c45;
+  }
+  
+  /* Estilo para o formulário de avaliação */
+form {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 20px auto;
+  }
+  
+  form label {
+    font-size: 1.1em;
+    margin-bottom: 8px;
+    color: #333;
+  }
+  
+  form select, form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+  }
+  
+  form button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.1em;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  form button:hover {
+    background-color: #4CAF50;
+  }
+  
+  .fa-arrow-left, .fa-arrow-right {
+    font-size: 24px; /* Tamanho do ícone */
+    color: #007bff; /* Cor do ícone */
+  }
+  .fa-arrow-left:hover, .fa-arrow-right:hover {
+    color: #0056b3; /* Cor ao passar o mouse */
+  }
+
+  h3 {
+    margin-top: 10px;
+  }

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finalizar Pedido</title>
+</head>
+<body>
+  <h1>Finalizar Pedido</h1>
+
+  <h2>Itens no Carrinho:</h2>
+  <ul>
+    <% carrinho.forEach(item => { %>
+      <li>
+        <% const preco = new Intl.NumberFormat('pt-BR', {style: 'currency', currency:'BRL'}).format(livro.preco) %>
+        <strong><%= item.titulo %></strong> - <%= preco %> %>
+      </li>
+    <% }); %>
+  </ul>
+
+  <form action="/criarPedido" method="POST">
+    <input type="hidden" name="carrinho" value='<%= JSON.stringify(carrinho) %>' />
+    <label for="enderecoEntrega">Endereço de Entrega:</label>
+    <input type="text" id="enderecoEntrega" name="enderecoEntrega" required>
+    <button type="submit">Confirmar Pedido</button>
+  </form>
+</body>
+
+</html>

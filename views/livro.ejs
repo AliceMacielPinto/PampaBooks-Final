@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= livro.titulo %> - PampaBooks</title>
+  <link rel="stylesheet" href="/css/styleLivro.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script>
+    // Lista de livros selecionados (armazenado no localStorage)
+  let livrosSelecionados = JSON.parse(localStorage.getItem('livrosSelecionados')) || [];
+
+  // Função para adicionar um livro ao formulário
+  function adicionarAoFormulario(id, titulo, preco) {
+    preco = parseFloat(preco); // Converte o preço para número
+    if (!livrosSelecionados.find(livro => livro.id === id)) {
+      livrosSelecionados.push({ id, titulo, preco });
+      localStorage.setItem('livrosSelecionados', JSON.stringify(livrosSelecionados)); // Salva no localStorage
+    }
+    atualizarFormulario();
+  }
+
+  function adicionarAoPedido(id, titulo, preco) {
+    // Obtemos o carrinho de livros do localStorage ou criamos um novo
+    let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+    
+    // Adiciona o livro ao carrinho
+    if (!carrinho.find(livro => livro.id === id)) {
+      carrinho.push({ id, titulo, preco });
+      localStorage.setItem('carrinho', JSON.stringify(carrinho)); // Salva no localStorage
+    }
+    alert('Livro adicionado ao pedido!');
+  }
+  // Atualiza a área do formulário
+  function atualizarFormulario() {
+    const formularioContainer = document.getElementById('formulario-pedido');
+    formularioContainer.innerHTML = ` 
+      <h3>Livros Selecionados</h3>
+      ${livrosSelecionados.map(livro => `
+        <div>
+          <p>${livro.titulo} - ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(livro.preco)}</p>
+        </div>
+      `).join('')}
+      <button onclick="finalizarPedido()">Finalizar Pedido</button>
+    `;
+  }
+
+  // Finaliza o pedido
+  async function finalizarPedido() {
+    const enderecoEntrega = prompt("Digite o endereço de entrega:");
+    if (!enderecoEntrega) return alert("Endereço é obrigatório!");
+
+    const response = await fetch("/criarPedido", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enderecoEntrega, carrinho: livrosSelecionados }),
+    });
+
+    if (response.ok) {
+      alert("Pedido criado com sucesso!");
+      localStorage.removeItem('livrosSelecionados'); // Limpa o localStorage após o pedido
+      location.reload(); // Recarrega a página para limpar o formulário
+    } else {
+      alert("Erro ao finalizar pedido.");
+    }
+  }
+
+  // Atualiza o formulário ao carregar a página (exibe livros selecionados salvos no localStorage)
+  window.onload = atualizarFormulario;
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      display: flex;
+      padding-right: 300px; /* Deixa espaço à direita para o pedido fixo */
+    }
+
+    .livro-info {
+      flex: 3;
+      padding: 20px;
+    }
+
+    .livro-info img {
+      max-width: 200px;
+      margin-bottom: 10px;
+    }
+
+    #formulario-pedido {
+      position: fixed; /* Fixar o formulário na lateral direita */
+      right: 0; /* Coloca o formulário no canto direito da tela */
+      top: 80px; /* Ajuste o valor para dar mais espaço entre o menu e o formulário */
+      width: 300px; /* Largura do painel lateral */
+      padding: 20px;
+      border-left: 2px solid #ddd;
+      background-color: #f9f9f9;
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #formulario-pedido h3 {
+      margin-top: 0;
+    }
+
+    .button {
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .button:hover {
+      background-color: #218838;
+    }
+
+    .livro-info h2, .livro-info p {
+      margin: 0 0 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Menu Superior -->
+  <div class="menu">
+    <div>
+      <a href="/catalog">Início</a>
+    </div>
+    <div>
+      <div>
+        <% if (usuario && usuario.role === 'admin') { %>
+          <li><a href="/formulario-livro">Cadastrar Livro</a></li>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <div class="book-details">
+      <div class="book-info">
+        <h1><%= livro.titulo %></h1>
+        <p><strong>Autor:</strong> <%= livro.autor %></p>
+        <p><strong>Ano:</strong> <%= livro.ano %></p>
+        <p><strong>Editora:</strong> <%= livro.editora %></p>
+        <p><strong>Preço:</strong> <%= new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(livro.preco) %></p>
+      </div>
+      <div class="book-image">
+        <img src="<%= livro.capa %>" alt="Capa do livro" />
+      </div>
+    </div>
+    <!-- Botão de adicionar ao pedido -->
+    <button class="button" onclick="adicionarAoFormulario('<%= livro._id %>', '<%= livro.titulo %>', '<%= livro.preco %>')">
+        Adicionar ao Pedido
+    </button>
+  </header>
+
+  <section>
+    <h2>Detalhes do Livro</h2>
+    <p><strong>Descrição:</strong> <%= livro.descricao %></p>
+  </section>
+
+  <section>
+    <div style="position: relative;">
+      <h2>Avaliações</h2>
+      <ul>
+        <% avaliacoes.forEach(avaliacao => { %>
+          <li>
+            <p><strong><%= avaliacao.usuario ? avaliacao.usuario.nome : 'Anônimo' %>:</strong> <%= avaliacao.nota %> estrelas</p>
+            <p><%= avaliacao.comentario %></p>
+          </li>
+        <% }); %>
+      </ul>
+
+      <!-- Navegação de páginas -->
+      <div style="position: absolute; right: 0; bottom: 10px;">
+        <% if (currentPage > 1) { %>
+          <a href="/livro/<%= livro._id %>?page=<%= currentPage - 1 %>">
+            <i class="fas fa-arrow-left"></i> <!-- Ícone de seta para a esquerda -->
+          </a>
+        <% } %>
+
+        <% if (currentPage < totalPages) { %>
+          <a href="/livro/<%= livro._id %>?page=<%= currentPage + 1 %>">
+            <i class="fas fa-arrow-right"></i> <!-- Ícone de seta para a direita -->
+          </a>
+        <% } %>
+      </div>
+    </div>
+
+    <h3>Avalie este livro</h3>
+    <form action="/avaliacoes" method="POST">
+      <input type="hidden" name="livroId" value="<%= livro._id %>" />
+      
+      <label for="nota">Nota (1 a 5 estrelas):</label>
+      <select id="nota" name="nota" required>
+        <option value="1">1 estrela</option>
+        <option value="2">2 estrelas</option>
+        <option value="3">3 estrelas</option>
+        <option value="4">4 estrelas</option>
+        <option value="5">5 estrelas</option>
+      </select>
+
+      <label for="comentario">Comentário:</label>
+      <textarea id="comentario" name="comentario" rows="4" required></textarea>
+
+      <button type="submit">Enviar Avaliação</button>
+    </form>
+
+    <!-- Formulário de pedido -->
+    <div id="formulario-pedido">
+      <h3>Livros Selecionados</h3>
+    </div>
+  </section>
+</body>
+</html>

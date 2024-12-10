@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de Livros</title>
+  <!-- Link para o arquivo CSS externo -->
+  <link rel="stylesheet" href="/css/styleCatalog.css">
+  <script>
+    // Lista de livros selecionados
+    let livrosSelecionados = [];
+
+    // Função para carregar os livros armazenados no localStorage
+    function carregarLivrosDoLocalStorage() {
+      const livrosSalvos = JSON.parse(localStorage.getItem('livrosSelecionados'));
+      if (livrosSalvos) {
+        livrosSelecionados = livrosSalvos; // Atribui os livros do localStorage à variável
+        atualizarFormulario(); // Atualiza o formulário para refletir os livros carregados
+      }
+    }
+
+    // Função para adicionar um livro ao formulário
+    function adicionarAoFormulario(id, titulo, preco) {
+      preco = parseFloat(preco); // Converte o preço para número
+      if (!livrosSelecionados.find(livro => livro.id === id)) {
+        livrosSelecionados.push({ id, titulo, preco }); // Adiciona o livro se não estiver na lista
+      }
+      // Salva os livros no localStorage
+      localStorage.setItem('livrosSelecionados', JSON.stringify(livrosSelecionados));
+      atualizarFormulario(); // Atualiza o formulário com a nova lista de livros
+    }
+
+    // Função para calcular o valor total do pedido
+    function calcularTotal() {
+      return livrosSelecionados.reduce((total, livro) => total + livro.preco, 0); // Soma os preços dos livros
+    }
+
+    // Atualiza a área do formulário
+    function atualizarFormulario() {
+      const formularioContainer = document.getElementById('formulario-pedido');
+      const total = calcularTotal();
+      const totalFormatado = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total);
+      
+      formularioContainer.innerHTML = ` 
+        <h3>Livros Selecionados</h3>
+        ${livrosSelecionados.map(livro => {
+          const precoFormatado = new Intl.NumberFormat('pt-BR', {style: 'currency', currency:'BRL'}).format(livro.preco);
+          return ` 
+            <div>
+              <p>${livro.titulo} - ${precoFormatado}</p>
+            </div>
+          `;
+        }).join('')}
+        
+        <!-- Exibe o total -->
+        <p><strong>Total:</strong> ${totalFormatado}</p>
+
+        <button onclick="mostrarFormularioEndereco()">Finalizar Pedido</button>
+        
+        <!-- Adiciona o campo de endereço -->
+        <div id="formulario-endereco" style="display: none;">
+          <label for="enderecoEntrega">Endereço de Entrega:</label>
+          <input type="text" id="enderecoEntrega" name="enderecoEntrega" required>
+          <button onclick="finalizarPedido()">Confirmar Pedido</button>
+        </div>
+      `;
+    }
+
+    // Função para exibir o formulário de endereço
+    function mostrarFormularioEndereco() {
+      const formularioEndereco = document.getElementById('formulario-endereco');
+      formularioEndereco.style.display = 'block'; // Exibe o campo de endereço
+    }
+
+    // Finaliza o pedido
+    async function finalizarPedido() {
+      const enderecoEntrega = document.getElementById('enderecoEntrega').value;
+      if (!enderecoEntrega) return alert("Endereço é obrigatório!");
+
+      const response = await fetch("/criarPedido", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enderecoEntrega, carrinho: livrosSelecionados }),
+      });
+
+      if (response.ok) {
+        alert("Pedido criado com sucesso!");
+        localStorage.removeItem('livrosSelecionados'); // Limpa os livros no localStorage
+        location.reload(); // Recarrega a página para limpar o formulário
+      } else {
+        alert("Erro ao finalizar pedido.");
+      }
+    }
+
+    // Função para visualizar pedidos anteriores
+async function visualizarPedidos() {
+  const pedidosContainer = document.getElementById('pedidos-anteriores');
+  const listaPedidos = document.getElementById('lista-pedidos');
+  
+  // Fazendo uma requisição para buscar os pedidos
+  const response = await fetch('/pedidos');
+  const pedidos = await response.json();
+
+  // Se houver pedidos, renderize na lista
+  if (pedidos.length > 0) {
+    listaPedidos.innerHTML = pedidos.map(pedido => {
+      // Formatar os preços dos itens
+      const precoFormatadoItens = pedido.itens.map(item => {
+        const preco = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.precoUnitario);
+        return `<li><strong>${item.produto.titulo}</strong> - ${preco}</li>`;
+      }).join('');
+
+      // Formatar o total do pedido
+      const totalFormatado = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(pedido.custoTotal);
+
+      return `
+        <div class="pedido">
+          <h4>Pedido realizado em: ${new Date(pedido.dataPedido).toLocaleDateString('pt-BR')}</h4>
+          <ul>
+            ${precoFormatadoItens}
+          </ul>
+          <div class="linha"></div>
+          <p><strong>Total:</strong> ${totalFormatado}</p>
+        </div>
+      `;
+    }).join('');
+    
+    // Exibe a lista de pedidos
+    pedidosContainer.style.display = 'block';
+  } else {
+    listaPedidos.innerHTML = '<p><em>Não há pedidos anteriores.</em></p>';
+    pedidosContainer.style.display = 'block';
+  }
+}
+
+    // Carregar livros do localStorage assim que a página for carregada
+    window.onload = function() {
+      carregarLivrosDoLocalStorage();
+    };
+  </script>
+  <style>
+   body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      display: flex;
+    }
+
+    .livros {
+      flex: 3;
+      padding: 20px;
+    }
+
+    .livro {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+
+    .livro img {
+      max-width: 100px;
+      margin-bottom: 10px;
+    }
+
+    #formulario-pedido {
+      flex: 1;
+      padding: 20px;
+      border-left: 2px solid #ddd;
+      background-color: #f9f9f9;
+    }
+
+    #formulario-pedido h3 {
+      margin-top: 0;
+    }
+
+    /* Estilo para os pedidos anteriores */
+  #pedidos-anteriores {
+    margin-top: 20px;
+  }
+
+  #lista-pedidos {
+    margin-top: 20px;
+  }
+
+  .pedido {
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+
+  .pedido h4 {
+    margin: 0;
+    font-size: 1.2em;
+  }
+
+  .pedido ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .pedido ul li {
+    margin-bottom: 5px;
+  }
+
+  .pedido .linha {
+    border-top: 2px solid #ddd;
+    margin-top: 15px;
+    padding-top: 10px;
+  }
+
+  /* Botões */
+  button {
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  button:hover {
+    background-color: #2c8d2f;
+  }
+  </style>
+</head>
+<body>
+   <!-- Menu Superior -->
+<div class="menu">
+  <div>
+    <a href="/catalog">Início</a>
+  </div>
+
+  <!-- Verifica se o usuário é admin -->
+  <div>
+    <% if (usuario && usuario.role === 'admin') { %>
+      <li><a href="/formulario-livro">Cadastrar Livro</a></li>
+    <% } %>
+  </div>
+</div>
+
+  <h1>Catálogo de Livros</h1>
+
+  <!-- Contêiner principal -->
+  <div class="container">
+    <!-- Lista de livros -->
+    <div class="livros">
+      <% livros.forEach(livro => { %> 
+        <div class="livro">
+          <a href="/livro/<%= livro._id %>">
+          <% if (livro.capa) { %>
+            <img src="<%= livro.capa %>" alt="Capa do Livro" class="livro-capa">
+          <% } else { %>
+            <img src="/images/placeholder.jpg" alt="Capa Padrão" class="livro-capa">
+          <% } %>
+          <h2><%= livro.titulo %></h2>
+          </a>
+          <p><strong>Autor:</strong> <%= livro.autor %></p>
+          <% const preco = new Intl.NumberFormat('pt-BR', {style: 'currency', currency:'BRL'}).format(livro.preco) %>
+          <p><strong>Preço:</strong> <%= preco %></p>
+          <button 
+          onclick="adicionarAoFormulario('<%= livro._id %>', '<%= livro.titulo %>', '<%= livro.preco %>')">
+          Selecionar
+          </button>
+        </div>
+      <% }); %>
+      </div>
+
+
+  <div id="formulario-pedido">
+    <h3>Livros Selecionados</h3>
+
+    <button onclick="finalizarPedido()">Finalizar Pedido</button>
+    
+     
+<!-- Botão para visualizar pedidos anteriores -->
+<button onclick="visualizarPedidos()">Visualizar Pedidos Anteriores</button>
+
+<!-- Lista de pedidos anteriores (inicialmente escondida) -->
+<div id="pedidos-anteriores" style="display: none;">
+  <h3>Pedidos Anteriores</h3>
+  <div id="lista-pedidos">
+    <!-- Os pedidos serão carregados aqui -->
+  </div>
+</div>
+</div>
+</body>
+</html>
